@@ -16,14 +16,11 @@ class Picker {
     // Add controls.
     // Year picker.
     this.year = document.createElement(`select`);
-    Picker.createRangeSelect(
-      this.year,
-      1890, // oldest person alive born in 1894
-      this.date.getFullYear() + 20
-    );
+
     this.year.className = `yearSelect`;
     this.year.addEventListener(`change`, ()=> {
       this.date.setYear(this.year.value);
+      this.refreshMonthsList();
       this.refreshDaysMatrix();
     });
     const yearWrapper = document.createElement(`span`);
@@ -178,6 +175,8 @@ class Picker {
 
     this.input = input;
     this.refreshLocale();
+    this.refreshYearsList();
+    this.refreshMonthsList();
     this.sync();
     this.goto(this.input);
     return true;
@@ -222,13 +221,49 @@ class Picker {
       daysHeadHTML.push(`<th scope="col">${this.locale.days[i]}</th>`);
     }
     this.daysHead.innerHTML = daysHeadHTML.join(``);
+  }
+
+  refreshYearsList() {
+    const [minConstraint, maxConstraint] = this.getExtent();
+
+    this.yearRange = [minConstraint ? minConstraint.getFullYear() : 1890,
+      maxConstraint ? maxConstraint.getFullYear() : this.date.getFullYear() + 20];
+
+    Picker.createRangeSelect(
+      this.year,
+      ...this.yearRange
+    );
+  }
+
+  refreshMonthsList() {
+    const year = this.year.value;
+    const [minConstraint, maxConstraint] = this.getExtent();
+
+    this.monthRange = [0, 11];
+
+    if (minConstraint && minConstraint.getFullYear() == year) {
+      this.monthRange[0] = minConstraint.getMonth();
+    }
+
+    if (maxConstraint && maxConstraint.getFullYear() == year) {
+      this.monthRange[1] = maxConstraint.getMonth();
+    }
+
+    const monthNames = this.locale.months.slice(this.monthRange[0], this.monthRange[1] + 1);
 
     Picker.createRangeSelect(
       this.month,
-      0,
-      11,
-      this.locale.months
+      ...this.monthRange,
+      monthNames
     );
+  }
+
+  getExtent() {
+    let minConstraint = this.input.getAttribute('min');
+    let maxConstraint = this.input.getAttribute('max');
+    minConstraint = minConstraint ? Picker.absoluteDate(new Date(minConstraint)) : null;
+    maxConstraint = maxConstraint ? Picker.absoluteDate(new Date(maxConstraint)) : null;
+    return [minConstraint, maxConstraint];
   }
 
   refreshDaysMatrix() {
@@ -238,7 +273,8 @@ class Picker {
     // as well as on which weekdays they lie.
     const year = this.date.getFullYear(); // Get the year (2016).
     const month = this.date.getMonth(); // Get the month number (0-11).
-    const startDay = new Date(year, month, 1).getDay(); // First weekday of month (0-6).
+    const startDateObj = new Date(year, month, 1);
+    const startDay = startDateObj.getDay(); // First weekday of month (0-6).
     const maxDays = new Date(
       this.date.getFullYear(),
       month + 1,
@@ -256,6 +292,10 @@ class Picker {
 
     // Populate days matrix.
     const matrixHTML = [];
+
+    let [minConstraint, maxConstraint] = this.getExtent();
+
+
     for(let i = 0; i < maxDays + startDay; ++i) {
       // Add a row every 7 days.
       if(i % 7 === 0) {
@@ -276,8 +316,13 @@ class Picker {
       const dayNum = i + 1 - startDay;
       const selected = selMatrix && selDate.getDate() === dayNum;
 
+      const currentDay = new Date(startDateObj);
+      currentDay.setDate(dayNum);
+
+      const enabled = (!minConstraint || (minConstraint <= currentDay)) && (!maxConstraint || (maxConstraint >= currentDay))
+
       matrixHTML.push(
-        `<td data-day ${selected ? `data-selected` : ``}>
+        `<td data-day ${selected ? `data-selected` : ``} ${!enabled ? `data-disabled` : ``}>
           ${dayNum}
         </td>`
       );

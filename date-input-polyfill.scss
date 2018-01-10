@@ -109,4 +109,8 @@ date-input-polyfill {
     font-weight: bold;
     background: #D8EAF6;
   }
+  [data-disabled] {
+    background: #eee;
+    pointer-events: none;
+  }
 }
