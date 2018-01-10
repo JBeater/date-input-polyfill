@@ -35,7 +35,7 @@ export default class Input {
             format.replace(/(yyyy|dd|mm)/g, part=> {
               fmt[part] = i++;
             });
-            return new Date(parts[fmt['yyyy']], parts[fmt['mm']]-1, parts[fmt['dd']]);
+            return new Date(Date.UTC(parts[fmt['yyyy']], parts[fmt['mm']]-1, parts[fmt['dd']]));
           },
           set: val => {
             this.element.value = dateFormat(val, this.format);
