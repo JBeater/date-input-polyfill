@@ -303,18 +303,18 @@ class Picker {
           ${i !== 0 ? `</tr>` : ``}
           <tr>
         `);
-      }
+			}
 
-      // Add new column.
-      // If no days from this month in this column, it will be empty.
-      if(i + 1 <= startDay) {
-        matrixHTML.push(`<td></td>`);
-        continue;
-      }
+			// Add new column.
+			// If no days from this month in this column, it will be empty.
+			if(i + 1 <= startDay) {
+				matrixHTML.push(`<td></td>`);
+				continue;
+			}
 
-      // Populate day number.
-      const dayNum = i + 1 - startDay;
-      const selected = selMatrix && selDate.getDate() === dayNum;
+			// Populate day number.
+			const dayNum = i + 1 - startDay;
+			const selected = selMatrix && (selDate.getDate()) === dayNum;
 
       const currentDay = new Date(startDateObj);
       currentDay.setDate(dayNum);
@@ -325,53 +325,49 @@ class Picker {
         `<td data-day ${selected ? `data-selected` : ``} ${!enabled ? `data-disabled` : ``}>
           ${dayNum}
         </td>`
-      );
-    }
+			);
+		}
 
-    this.days.innerHTML = matrixHTML.join(``);
-  }
+		this.days.innerHTML = matrixHTML.join(``);
+	}
 
-  pingInput() {
-    // Dispatch DOM events to the input.
-    let inputEvent;
-    let changeEvent;
+	pingInput() {
+		// Dispatch DOM events to the input.
+		let inputEvent;
+		let changeEvent;
 
-    // Modern event creation.
-    try {
-      inputEvent = new Event(`input`);
-      changeEvent = new Event(`change`);
-    }
-    // Old-fashioned way.
-    catch(e) {
-      inputEvent = document.createEvent(`KeyboardEvent`);
-      inputEvent.initEvent(`input`, true, false);
-      changeEvent = document.createEvent(`KeyboardEvent`);
-      changeEvent.initEvent(`change`, true, false);
-    }
+		// Modern event creation.
+		try {
+			inputEvent = new Event(`input`);
+			changeEvent = new Event(`change`);
+		}
+			// Old-fashioned way.
+		catch(e) {
+			inputEvent = document.createEvent(`KeyboardEvent`);
+			inputEvent.initEvent(`input`, true, false);
+			changeEvent = document.createEvent(`KeyboardEvent`);
+			changeEvent.initEvent(`change`, true, false);
+		}
 
-    this.input.dispatchEvent(inputEvent);
-    this.input.dispatchEvent(changeEvent);
-  }
+		this.input.dispatchEvent(inputEvent);
+		this.input.dispatchEvent(changeEvent);
+	}
 
-  static createRangeSelect(theSelect, min, max, namesArray) {
-    theSelect.innerHTML = ``;
+	static createRangeSelect(theSelect, min, max, namesArray) {
+		theSelect.innerHTML = ``;
 
-    for(let i = min; i <= max; ++i) {
-      const aOption = document.createElement(`option`);
-      theSelect.appendChild(aOption);
+		for(let i = min; i <= max; ++i) {
+			const aOption = document.createElement(`option`);
+			theSelect.appendChild(aOption);
 
-      const theText = namesArray ? namesArray[i - min] : i;
+			const theText = namesArray ? namesArray[i - min] : i;
 
-      aOption.text = theText;
-      aOption.value = i;
-    }
+			aOption.text = theText;
+			aOption.value = i;
+		}
 
-    return theSelect;
-  }
-
-  static absoluteDate(date) {
-    return date && new Date(date.getTime() + date.getTimezoneOffset()*60*1000);
-  }
+		return theSelect;
+	}
 }
 
 window.thePicker = new Picker();
